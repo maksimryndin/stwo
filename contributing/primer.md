@@ -12,6 +12,10 @@ Basically, we are re-running the same experiment as in [this video](https://x.co
 
 Let's try to focus on a big picture for now. So we have two parties and two routines `prove_poseidon` and `verify`.
 
+Arithmetization (execution trace as a polynomial)
+Composition polynomial - constraints + trace polynomial
+FRI
+
 ## Prover (`prove_poseidon`)
 
 There are some precomputation steps (`SimdBackend::precompute_twiddles`) and protocol setup (a channel for non-interactivity, a polynomial commitment scheme) we will return to them later. Now let's focus on the *trace*.
@@ -19,6 +23,8 @@ There are some precomputation steps (`SimdBackend::precompute_twiddles`) and pro
 ### Trace (`gen_trace`)
 
 So our goal here is to prove the computation of a poseidon2 hash function. The appoach taken in many proof systems is to define a machine with T registers (which track the computation state), execute the computation and record the computation trace as a journal of state changes (say N). So we have a matrix NxT of N rows (state changes) and T columns (registers which store state variables).
+
+> The preover could sent the execution trace to the verifier (ignoring zero-knowledge for now) and the verifier checks the constraints over the execution trace. But such a solution lacks *succinctness*.
 
 Let's look at the signature of `gen_trace`:
 
@@ -69,7 +75,7 @@ The input to the poseidon2 hash function matches the expected output iif the alg
 
 Integrity of the original computation is transformed into proving that the AIR constraints are satisfied. The process of reducing the computation trace to the set of the polynomial constraints is named *arithmetization*.
 
-So we treat each column of the computation trace as values of a polynomial over the `CircleDomain`.
+So we treat each column of the computation trace as values of a polynomial over the `CircleDomain`. The circle domain is represented by values of a multiplicative group. So if X is a current row, then wX is the next row where w is a generator.
 
 When we define constraints, we can move both along the columns and along the rows.
 Then every constraint (which may include values of several polynomials) is representated as a rational function (think of moving along the rows).
@@ -82,15 +88,17 @@ As a quick refresher on domain and image of the mapping(function) see [Cartesian
 
 The circle curve is defined by the equation x^2 + y^2 = 1, where x and y come from the finite prime field. At the current stage of the proof the field is M31. The circle curve is represented by [`struct CirclePoint`](crates/prover/src/core/circle.rs) and 
 
-The circle curve can be treated as a group.
+The circle curve [can be treated](https://www.researchgate.net/publication/371339788_Reed-Solomon_codes_over_the_circle_group) as a group.
 
 > Group  is an algebraic structure (less structured that Field) which has only one "addition" operation (as opposed to Field) which is associative (you can place brackets as you wish) and closed over the set of its elements. An identity element is defined (think of it as 0 for addition) and every element of the group has an inverse element (if we "add" a group element with its inverse, we get the identity element).
 
 The "addition" operation for the circle curve group is defined by [`Add`](crates/prover/src/core/circle.rs) trait implementation for `CirclePoint<F>`. Identity and inverse elements are implemented as `zero()` and `conjugate(&self)` methods of `CirclePoint<F>` accordingly.
 
-Moreover, the circle curve group is a [cyclic group](http://abstract.ups.edu/aata/cyclic-section-cyclic-subgroups.html), i.e. all its elements can be obtained from a single one, called *generator*.
+Moreover, the circle curve group is a [cyclic group](http://abstract.ups.edu/aata/cyclic-section-cyclic-subgroups.html), i.e. all its elements can be obtained from a single one, called *generator*, by applying the group's operation (some number of times).
 
-Circle points are place of over the circle. And if we consider a zero as a start, then we can index 
+Circle points are placed of over the circle. And if we consider a zero as a start, then we can index 
+
+> Why do we need this Circle over the Field at all? Why not work direclty over the field? The reason is that M31 is not FFT-friendly - more on it later.
 
 > [Groups](http://abstract.ups.edu/aata/groups-section-defnitions.html)
 > [Subgroups](http://abstract.ups.edu/aata/groups-section-subgroups.html)
@@ -104,8 +112,10 @@ Coset is a set which is obtained
 CircleDomain
 CanonicCoset
 
+Boundary (initial and final values) and transition (computation evolution over time) constraints
 
 
+Evaluation domain serves for Merkle commitments
 
 
 
@@ -158,6 +168,14 @@ A clever generalization of our basic commitment scheme is a Merkle tree (usually
 partially updatable (O(log2|m|)), if no privacy is ok - then no salts (no need for hiding, only data integrity)
 
 
+Why FRI? We could sent to the verifier the whole trace polynomial but it would mean that the proof is not succinct.
+FRI is a generalization of Merkle tree - a polynomial commitment scheme - we commit to a polynomial and its roots by evaluating a quotient polynomial??
+
+
+multivariate polynomial rings
+
+𝐹𝑝[𝑥,𝑦]/(𝑥2+𝑦2–1)
+Polynomials in 2 variables (x and y), coefficients are taken from 𝐹𝑝, are divisable by 𝑥2+𝑦2–1
 
 
 
@@ -188,3 +206,15 @@ Implement a Poseidon2 benchmark with the CPU backend and compare the performance
 7. [Exploring circle STARKs](https://vitalik.eth.limo/general/2024/07/23/circlestarks.html) (accessed in November 2024)
 8. [Why I’m excited by Circle STARK and Stwo](https://elibensasson.blog/why-im-excited-by-circle-stark-and-stwo/) (accessed in November 2024)
 9. [Abstract Algebra: Theory and Applications](http://abstract.ups.edu/aata/aata-toc.html) (accessed in November 2024)
+10. [Diving DEEP FRI in the STARK world: learning your daily moon math with a concrete example](https://blog.lambdaclass.com/diving-deep-fri/#sampling-outside-the-original-domain) (accessed in November 2024)
+11. [Yet another circle STARK tutorial](https://research.chainsafe.io/blog/circle-starks/) (accessed in November 2024)
+12. [A Walk-through of a Simple Zk-STARK Proof](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4308637) (accessed in November 2024)
+13. [How to code FRI from scratch](https://blog.lambdaclass.com/how-to-code-fri-from-scratch/) (accessed in November 2024)
+14. [Circle STARKs: Part I, Mersenne](https://www.zksecurity.xyz/blog/posts/circle-starks-1/) (accessed in November 2024)
+15. [Reed-Solomon codes over the circle group](https://www.researchgate.net/publication/371339788_Reed-Solomon_codes_over_the_circle_group) (accessed in November 2024)
+16. [STARK book](https://zksecurity.github.io/stark-book/stark/overview.html) (accessed in November 2024)
+17. [Notes on STARK Arithmetization](https://cronokirby.com/posts/2022/09/notes-on-stark-arithmetization/)
+18. [An introduction to circle STARKs](https://blog.lambdaclass.com/an-introduction-to-circle-starks/)
+19. [Circle STARK: Understanding Circle Group’s Operation as Rotation](https://www.shuangcrypto.com/2024/11/13/circle-stark-understanding-circle-group/)
+20. [Coset](https://www.shuangcrypto.com/2024/11/06/coset/)
+21. 
