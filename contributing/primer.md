@@ -22,9 +22,20 @@ There are some precomputation steps (`SimdBackend::precompute_twiddles`) and pro
 
 ### Trace (`gen_trace`)
 
-So our goal here is to prove the computation of a poseidon2 hash function. The appoach taken in many proof systems is to define a machine with T registers (which track the computation state), execute the computation and record the computation trace as a journal of state changes (say N). So we have a matrix NxT of N rows (state changes) and T columns (registers which store state variables).
+So our goal here is to prove the computation of a poseidon2 hash function. Prove via the math. So we need to transform our computation into some math form (the process called *arithmetization*). The appoach taken in many proof systems is to define a machine with T registers (which track the computation state), execute the computation and record the computation trace as a journal of state changes (say N). So we have a matrix NxT of N rows (state changes) and T columns (registers which store state variables).
 
-> The preover could sent the execution trace to the verifier (ignoring zero-knowledge for now) and the verifier checks the constraints over the execution trace. But such a solution lacks *succinctness*.
+If we represent every column of the trace with a low-degree polynomial (def(f) < N), then enforce constraints (boundary and transition ones) over the trace using these column polynomials (stop: we can have a no-zk and non-succinct proof here).
+We would like to utilize low-degree testing as a verification strategy for succinctness. What if we combine constraints and column polynomials, get constraints polynomials. These constraints polynomials let's divide with vanishing polynomials (basically roots of columns polynomials) and get quotients polynomials (of degree = degree of constraints polynomials - N), weight them (with random weights from verifier) to obtain their linear combination called a composition polynomial. Because we obtained the quotient polynomials by dividing with vanishing polynomials, we cannot evaluate the composition polynomial (without division by zero) over the initial multiplicative group domain so we an extension domain (a disjoint set which doesn't contain points from the trace domain). Q(X) = C(X)/Z(X); P(X) = a1 Q1 + a2Q2 + ..
+The idea to divide the constraints polynomials is due to:
+1) to transform the initial problem to low degree testing and checking that the constraints (as a consequence and a composition) polynomials enforce that constraints hold. Constraints hold only for the roots of vanishing polynomials (i.e. the trace domain). If we divide the constraint polynomial with some non-root, then the ratio cannot be a polynomial (we know from the school math that we can decompose a polynomial into multilpier only for its roots so we can reduce the polynomial only by dividing with its roots)
+2) 
+
+ then the resulting composite constraints polynomial should also be of the low degree. (so we transformed the idea of computation integrity from direct computation to algebraic constraints over column polynomials to low degree testing of a composition polynomial). At every such a transformation we need to prevent cheating via commitments. I.e. the malicious prover can just provide some crafted values.
+ The prover commits constraint polynomials and trace polynomials evaluated over the evaluation domain. With these committed values the verifier can calculate Q(X)*C(X) and it should be a vanishing polynomial.
+ If the malicious prover will try to construct a false composition polynomial, it will equal the true composition polynomial at most at degree N (the trace length). LOw degree testing is required otherwise high degree polynomials can fit any set of points (including the evaluation domain). We can test low degree by N+1 queries. And we should expect to find a non-zero value?? O(N) time. With FRI we can do better for O(logN) time. If after logN steps we didn't receive the constant polynomial, the original one wasn't of low degree. In exactly logN steps (otherwise it would be possible to cheat with a high degree polynomial via cancelling some items with a chosen weight) with high probability (holds with a large field)
+ So either we check these polynomials at every point of the evaluation domain (which is not succint) or we make random queries. In case of random queries we need a larger field to decrease the probability of a false statement (soundness). But as we need to limit an ability of a malicious prover to search for predefined parameters of the fake proof, we need a large search space. So we need a large field (extending the base field) for PCS to make the scheme secure.
+
+>  The prover could sent the execution trace to the verifier (ignoring zero-knowledge for now) and the verifier checks the constraints over the execution trace. But such a solution lacks *succinctness*.
 
 Let's look at the signature of `gen_trace`:
 
@@ -46,12 +57,14 @@ All operations with numbers are performed over some *field*.
 
 Why fields and not real numbers? Real numbers involve rounding errors due to their representation in a computer. Moreover, the result of an operation (addition/multiplication) is unbounded. 
 
-Much more natural for current CPU architectures is a finite prime field, Fp. (A prime number p has no divisors except 1 and itself). All operations in such a field are done modulo p so the set of possible felts is {0, 1, ..., p-1}.
+A much more natural fit for current CPU architectures is a finite prime field, Fp. (A prime number p has no divisors except 1 and itself). All operations in such a field are done modulo p so the set of possible felts is {0, 1, ..., p-1}.
 
 > Refresher on [The Integers mod n](http://abstract.ups.edu/aata/groups-section-mod-n-sym.html)
 
 
 Mersenne primes (primes of the form `2^n - 1`) are of binary-friendly structure. E.g. modulo reductions (`n % p` where n is an integer) can be done using addition and bit operations (check [`impl M31`](crates/prover/src/core/fields/m31.rs)) as division operations are costly.  Mersenne prime `2^31 - 1` (usually denoted as M31) perfectly fits `u32` which means it can be efficiently operated by both CPU and GPU (as a 4-byte unsigned integer). [`BaseField`](crates/prover/src/core/fields/m31.rs) is M31 (in the current implementation it is a wrapper around `u32` with some field-specific methods).
+
+> So the choice of a finite field instead of real numbers is a common technique to have performant arithmetic operations.
 
 In the `prove_poseidon` we can see `SimdBackend`. So the idea is to provide different backends ([cpu](./crates/prover/src/core/backend/cpu/), [simd](./crates/prover/src/core/backend/simd/), [GPU](https://github.com/NethermindEth/stwo-gpu)) to basic field operations. For example, in our the first method is [`precompute_twiddles`](./crates/prover/src/core/backend/simd/circle.rs) of the trait [`PolyOps`](./crates/prover/src/core/poly/circle/ops.rs).
 
@@ -68,6 +81,8 @@ In the main loop of `gen_trace` for every row (remember that we step by 16 simul
 As we have 8 (`N_INSTANCES_PER_ROW`) instances in a row and 158 (`N_COLUMNS_PER_REP`) state registers per instance, then totally we have 1264 felts (`N_COLUMNS`) in a row of the trace. As a reminder, every felt consists of 16 `u32` values (as it is a simd version).
 
 After the loop we see the evaluation of the trace over [`CircleDomain`](crates/prover/src/core/poly/circle/domain.rs).
+
+The input of a computation is called a *witness*.
 
 The input to the poseidon2 hash function matches the expected output iif the algebraic intermediate representation (AIR) polynomial constraints are satisfied.
 
@@ -88,6 +103,7 @@ As a quick refresher on domain and image of the mapping(function) see [Cartesian
 
 The circle curve is defined by the equation x^2 + y^2 = 1, where x and y come from the finite prime field. At the current stage of the proof the field is M31. The circle curve is represented by [`struct CirclePoint`](crates/prover/src/core/circle.rs) and 
 
+
 The circle curve [can be treated](https://www.researchgate.net/publication/371339788_Reed-Solomon_codes_over_the_circle_group) as a group.
 
 > Group  is an algebraic structure (less structured that Field) which has only one "addition" operation (as opposed to Field) which is associative (you can place brackets as you wish) and closed over the set of its elements. An identity element is defined (think of it as 0 for addition) and every element of the group has an inverse element (if we "add" a group element with its inverse, we get the identity element).
@@ -106,11 +122,191 @@ Circle points are placed of over the circle. And if we consider a zero as a star
 
 If we follow the nested structs of `CanonicCoset::new(log_size).circle_domain()`, we come up to [`Coset`](crates/prover/src/core/circle.rs).
 
-Coset is a set which is obtained 
+`CanonicCoset` is constructed from [`Coset::odds(log_size)`](crates/prover/src/core/poly/circle/canonic.rs) which in turn includes `CirclePointIndex::subgroup_gen(log_size)`.
+Let's explore the latter:
 
+```rust
+pub const M31_CIRCLE_LOG_ORDER: u32 = 31;
 
-CircleDomain
-CanonicCoset
+pub fn subgroup_gen(log_size: u32) -> Self {
+    assert!(log_size <= M31_CIRCLE_LOG_ORDER);
+    Self(1 << (M31_CIRCLE_LOG_ORDER - log_size))
+}
+```
+
+So the circle order is 2^31. We need to extract a subgroup from the whole field s.t. the subgroup order (i.e. the number of elements in the subgroup) is equal to the trace length (as column polynomials are evaluated over field elements which constitute a multiplicative group - we need to easily obtain any domain point via multiplying by the subgroup generator).
+
+In one of the `Coset` constructors:
+
+```rust
+pub fn odds(log_size: u32) -> Self {
+    let generator = CirclePointIndex::subgroup_gen(log_size + 1);
+    Self::new(generator, log_size)
+}
+```
+
+So we divide the size of the whole field 2^31 by the doubled length of the trace 2^(15+1) to get the subgroup generator 2^15 (or 32_768). Basically, we have 2^31 elements and we would like to find a step (generator) which equally distributes 2^15 points over 2^31 units. As we also add 1 to the log_size, it means we get a half-step.
+
+```rust
+impl Coset {
+    pub fn new(initial_index: CirclePointIndex, log_size: u32) -> Self {
+        assert!(log_size <= M31_CIRCLE_LOG_ORDER);
+        let step_size = CirclePointIndex::subgroup_gen(log_size);
+        Self {
+            initial_index,
+            initial: initial_index.to_point(),
+            step: step_size.to_point(),
+            step_size,
+            log_size,
+        }
+    }
+}
+```
+
+This half-step 2^15 (or 32_768) goes as an initial index into `Coset` constructor, while the step size is 2^16 (65_536).
+
+So we can enumerate rows of the trace with the following circle point indices:
+
+```
+2^15 (32_768)
+2^15 + 2^16*1 (98_304)
+2^15 + 2^16*2 (163_840)
+...
+2^15 + 2^16*(2^15-1) (2_147_450_880)
+```
+
+The last index is exactly half-step to 0 and the full step to the first index (check it yourself!). We can get the circle point from its index with `to_point` method of `CirclePointIndex`. If we look at it implmentation, it call the `mul` method of the `CirclePoint<M31>` which is effectively an exponentation by squaring (compare with the [`pow`](https://doc.rust-lang.org/stable/src/core/num/uint_macros.rs.html) method implementation) but the `double` operation (being an addition) is done specifically according to the rules of the Circle Curve group (check `Add` trait implementation for `CirclePoint<F>`):
+(x0, y0) + (x1, y1) = (x0 * x1 - y0 * y1, x0 * y1 + y0 * x1) (see the section "3.1 The circle curve as a group" of the article).
+
+```rust
+#[test]
+fn test_play_with_iterator() {
+    let log_size = 15;
+    let coset = Coset::odds(log_size);
+    assert_eq!(coset.size(), 1 << log_size, "odds coset size is trace length");
+    let mut iterator = coset.iter();
+    println!("first point: {:?}", iterator.next().unwrap());
+    println!("first point from index: {:?}", CirclePointIndex(32_768).to_point());
+    println!("second point: {:?}", iterator.next().unwrap());
+    println!("second point from index: {:?}", CirclePointIndex(98_304).to_point());
+    println!("last point: {:?}", iterator.last().unwrap());
+    println!("last point from index: {:?}", CirclePointIndex(2_147_450_880).to_point());
+}
+```
+
+(check the indices with `iter_indices` method of `Coset`)
+
+It was odds coset. But in the `CanonicCoset`'s `circle_domain` method the `half_odds` constructor of `Coset` is used with half the size of the trace. So the step is 2^(31-14) (131_072), two times bigger than in the previous case.
+
+```
+2^15 (32_768)
+2^15 + 2^17*1 (163_840)
+2^15 + 2^17*2 (294_912)
+...
+2^15 + 2^17*(2^14-1) (2_147_385_344)
+```
+
+```rust
+#[test]
+fn test_play_with_half_odds_coset() {
+    let log_size = 15 - 1;
+    let coset = Coset::half_odds(log_size);
+    assert_eq!(coset.size(), 1 << log_size, "half-odds coset size is half trace length");
+    let mut iterator = coset.iter();
+    println!("first point: {:?}", iterator.next().unwrap());
+    println!("first point from index: {:?}", CirclePointIndex(32_768).to_point());
+    println!("second point: {:?}", iterator.next().unwrap());
+    println!("second point from index: {:?}", CirclePointIndex(163_840).to_point());
+    println!("last point: {:?}", iterator.last().unwrap());
+    println!("last point from index: {:?}", CirclePointIndex(2_147_385_344).to_point());
+}
+```
+
+As we can see, half-odds Coset is basically skipping every second index of odds Coset. So its size is half the trace length.
+
+The [`CircleDomain`](crates/prover/src/core/poly/circle/domain.rs) is a disjoint (i.e. there is no intersection) union of two half-odds cosets, also called *twin cosets* (you can see from the implementation of the `iter` method of `CircleDomain`, see also Definition 2 in the article). This cosets are related by the circle group's inverse operation (J(x, y) := (x, −y) in the article and `conjugate` method of `CirclePoint`). Basically it means the first coset (half-odds coset from the above) has its twin obtained by mirroring the first coset over the x axis of the circle.
+
+Let's plot it!
+
+```sh
+cargo add --dev plotters
+```
+
+```rust
+use std::path::Path;
+use plotters::prelude::*;
+
+#[test]
+fn test_plot_circle_domain() {
+    let log_size = 15;
+    let coset = Coset::half_odds(log_size - 1);
+    let conjugate_coset = coset.conjugate();
+    assert_eq!(
+        coset.size() + conjugate_coset.size(),
+        1 << log_size,
+        "circle domain size is trace length"
+    );
+    let max_value = -((1 << crate::core::circle::M31_CIRCLE_LOG_ORDER) as i64);
+
+    let workspace_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
+    let image_path = Path::new(&workspace_dir)
+        .join("..")
+        .join("..")
+        .join("contributing")
+        .join("circle_domain.png");
+    let root = BitMapBackend::new(&image_path, (640, 480)).into_drawing_area();
+    root.fill(&WHITE).unwrap();
+
+    let mut chart = ChartBuilder::on(&root)
+        .caption(
+            "Circle Domain (of two twin cosets)",
+            ("sans-serif", 20).into_font(),
+        )
+        .margin(30)
+        .x_label_area_size(80)
+        .y_label_area_size(80)
+        .build_cartesian_2d(0..max_value, 0..max_value)
+        .unwrap();
+
+    chart
+        .configure_mesh()
+        .disable_x_mesh()
+        .disable_y_mesh()
+        .draw()
+        .unwrap();
+
+    let plotting_area = chart.plotting_area();
+    coset.iter().for_each(|circle_point| {
+        plotting_area
+            .draw_pixel((circle_point.x.0 as i64, circle_point.y.0 as i64), &RED)
+            .unwrap()
+    });
+    conjugate_coset.iter().for_each(|circle_point| {
+        plotting_area
+            .draw_pixel((circle_point.x.0 as i64, circle_point.y.0 as i64), &BLUE)
+            .unwrap()
+    });
+
+    root.present().unwrap();
+}
+```
+
+![Circle domain](./circle_domain.png)
+
+What!!?? Probably, you've expected something of a round shape. But remember, we work in the prime modulo field so all the operations are wrapped over M31 prime (namely 2^31-1). And we look closer - the points (red and blue ones) cloud is symmetric along both axis. Red points are the half-odds coset while blue points are representing its twin. I suggest you playing with `log_size` variable (e.g. 4) to see circle domains for different sizes of a trace.
+
+### Evaluation
+
+Let' go back to the `gen_trace` routine. Every trace column is paired with the circle domain (as `CircleEvaluation`) to be interpolated as a polynomial.
+
+In the `prove_poseidon` there is also a commitment scheme but let's ignore it for now. There is a line 
+
+```rust
+tree_builder.extend_evals(trace);
+```
+
+The [`extend_evals`](crates/prover/src/core/pcs/prover.rs) calls [`interpolate_columns`](crates/prover/src/core/poly/circle/ops.rs) which in turn calls [`interpolate_with_twiddles`](crates/prover/src/core/poly/circle/evaluation.rs) of `CircleEvaluation`. And internally it calls backend's (in our case `SimdBackend`) [`interpolate`](crates/prover/src/core/backend/simd/circle.rs) method of `PolyOps` trait implementation.
+
 
 Boundary (initial and final values) and transition (computation evolution over time) constraints
 
@@ -118,7 +314,7 @@ Boundary (initial and final values) and transition (computation evolution over t
 Evaluation domain serves for Merkle commitments
 
 
-
+Multiiplicative group also allows halving the evaluation domain by squaring (important for FRI)
 
 
 
@@ -213,8 +409,8 @@ Implement a Poseidon2 benchmark with the CPU backend and compare the performance
 14. [Circle STARKs: Part I, Mersenne](https://www.zksecurity.xyz/blog/posts/circle-starks-1/) (accessed in November 2024)
 15. [Reed-Solomon codes over the circle group](https://www.researchgate.net/publication/371339788_Reed-Solomon_codes_over_the_circle_group) (accessed in November 2024)
 16. [STARK book](https://zksecurity.github.io/stark-book/stark/overview.html) (accessed in November 2024)
-17. [Notes on STARK Arithmetization](https://cronokirby.com/posts/2022/09/notes-on-stark-arithmetization/)
-18. [An introduction to circle STARKs](https://blog.lambdaclass.com/an-introduction-to-circle-starks/)
-19. [Circle STARK: Understanding Circle Group’s Operation as Rotation](https://www.shuangcrypto.com/2024/11/13/circle-stark-understanding-circle-group/)
-20. [Coset](https://www.shuangcrypto.com/2024/11/06/coset/)
+17. [Notes on STARK Arithmetization](https://cronokirby.com/posts/2022/09/notes-on-stark-arithmetization/) (accessed in November 2024)
+18. [An introduction to circle STARKs](https://blog.lambdaclass.com/an-introduction-to-circle-starks/) (accessed in November 2024)
+19. [Circle STARK: Understanding Circle Group’s Operation as Rotation](https://www.shuangcrypto.com/2024/11/13/circle-stark-understanding-circle-group/) (accessed in November 2024)
+20. [Coset](https://www.shuangcrypto.com/2024/11/06/coset/) (accessed in November 2024)
 21. 
