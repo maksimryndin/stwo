@@ -307,6 +307,22 @@ tree_builder.extend_evals(trace);
 
 The [`extend_evals`](crates/prover/src/core/pcs/prover.rs) calls [`interpolate_columns`](crates/prover/src/core/poly/circle/ops.rs) which in turn calls [`interpolate_with_twiddles`](crates/prover/src/core/poly/circle/evaluation.rs) of `CircleEvaluation`. And internally it calls backend's (in our case `SimdBackend`) [`interpolate`](crates/prover/src/core/backend/simd/circle.rs) method of `PolyOps` trait implementation.
 
+FFT as a divide and conquer algorithm, master theorem, Cooley-Tuckey, DFT,
+change of basis (Vandermonde matrix)
+
+NTT is a DFT over a finite field of prime size (DFT is defined over the complex numbers or complex field)
+
+Coefficient representation -- evaluation --> Value representation
+Value representation -- interpolation --> Coefficient representation
+
+We can evaluate with
+* solving a system of linear equations
+* lagrange interpolation
+* DFT
+
+The key idea behind DFT is to reuse calculations (compare with Karatsuba multiplication).
+
+
 
 Boundary (initial and final values) and transition (computation evolution over time) constraints
 
@@ -374,6 +390,8 @@ multivariate polynomial rings
 Polynomials in 2 variables (x and y), coefficients are taken from 𝐹𝑝, are divisable by 𝑥2+𝑦2–1
 
 
+CM31 - complex field extension C(Fp) = Fp[x]/(x2 + 1)
+QM31 - quad field extension C(Fp)[x]/(x2 − 2 − i)
 
 
 Hash function as a heuristic for ROM (Random Oracle Model).
@@ -413,4 +431,5 @@ Implement a Poseidon2 benchmark with the CPU backend and compare the performance
 18. [An introduction to circle STARKs](https://blog.lambdaclass.com/an-introduction-to-circle-starks/) (accessed in November 2024)
 19. [Circle STARK: Understanding Circle Group’s Operation as Rotation](https://www.shuangcrypto.com/2024/11/13/circle-stark-understanding-circle-group/) (accessed in November 2024)
 20. [Coset](https://www.shuangcrypto.com/2024/11/06/coset/) (accessed in November 2024)
-21. 
+21. [Mersenne 31 Polynomial Arithmetic](https://github.com/ingonyama-zk/papers/blob/main/Mersenne31_polynomial_arithmetic.pdf) (accessed in November 2024)
+22. [NTT 201 - Foundations of NTT Hardware Design](https://github.com/ingonyama-zk/papers/blob/main/ntt_201_book.pdf)
