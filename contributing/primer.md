@@ -120,9 +120,9 @@ Circle points are placed of over the circle. And if we consider a zero as a star
 > [Subgroups](http://abstract.ups.edu/aata/groups-section-subgroups.html)
 > [Coset](http://abstract.ups.edu/aata/cosets-section-cosets.html)
 
-If we follow the nested structs of `CanonicCoset::new(log_size).circle_domain()`, we come up to [`Coset`](crates/prover/src/core/circle.rs).
+If we follow the nested structs of `CanonicCoset::new(log_size).circle_domain()`, we come up to [`Coset`](../crates/prover/src/core/circle.rs).
 
-`CanonicCoset` is constructed from [`Coset::odds(log_size)`](crates/prover/src/core/poly/circle/canonic.rs) which in turn includes `CirclePointIndex::subgroup_gen(log_size)`.
+`CanonicCoset` is constructed from [`Coset::odds(log_size)`](../crates/prover/src/core/poly/circle/canonic.rs) which in turn includes `CirclePointIndex::subgroup_gen(log_size)`.
 Let's explore the latter:
 
 ```rust
@@ -176,7 +176,7 @@ So we can enumerate rows of the trace with the following circle point indices:
 ```
 
 The last index is exactly half-step to 0 and the full step to the first index (check it yourself!). We can get the circle point from its index with `to_point` method of `CirclePointIndex`. If we look at it implmentation, it call the `mul` method of the `CirclePoint<M31>` which is effectively an exponentation by squaring (compare with the [`pow`](https://doc.rust-lang.org/stable/src/core/num/uint_macros.rs.html) method implementation) but the `double` operation (being an addition) is done specifically according to the rules of the Circle Curve group (check `Add` trait implementation for `CirclePoint<F>`):
-(x0, y0) + (x1, y1) = (x0 * x1 - y0 * y1, x0 * y1 + y0 * x1) (see the section "3.1 The circle curve as a group" of the article).
+(x0, y0) * (x1, y1) = (x0 * x1 - y0 * y1, x0 * y1 + y0 * x1) (see the section "3.1 The circle curve as a group" of the article).
 
 ```rust
 #[test]
@@ -224,7 +224,7 @@ fn test_play_with_half_odds_coset() {
 
 As we can see, half-odds Coset is basically skipping every second index of odds Coset. So its size is half the trace length.
 
-The [`CircleDomain`](crates/prover/src/core/poly/circle/domain.rs) is a disjoint (i.e. there is no intersection) union of two half-odds cosets, also called *twin cosets* (you can see from the implementation of the `iter` method of `CircleDomain`, see also Definition 2 in the article). This cosets are related by the circle group's inverse operation (J(x, y) := (x, −y) in the article and `conjugate` method of `CirclePoint`). Basically it means the first coset (half-odds coset from the above) has its twin obtained by mirroring the first coset over the x axis of the circle.
+The [`CircleDomain`](../crates/prover/src/core/poly/circle/domain.rs) is a disjoint (i.e. there is no intersection) union of two half-odds cosets, also called *twin cosets* (you can see from the implementation of the `iter` method of `CircleDomain`, see also Definition 2 in the article). This cosets are related by the circle group's inverse operation (J(x, y) := (x, −y) in the article and `conjugate` method of `CirclePoint`). Basically it means the first coset (half-odds coset from the above) has its twin obtained by mirroring the first coset over the x axis of the circle.
 
 Let's plot it!
 
@@ -307,20 +307,6 @@ tree_builder.extend_evals(trace);
 
 The [`extend_evals`](crates/prover/src/core/pcs/prover.rs) calls [`interpolate_columns`](crates/prover/src/core/poly/circle/ops.rs) which in turn calls [`interpolate_with_twiddles`](crates/prover/src/core/poly/circle/evaluation.rs) of `CircleEvaluation`. And internally it calls backend's (in our case `SimdBackend`) [`interpolate`](crates/prover/src/core/backend/simd/circle.rs) method of `PolyOps` trait implementation.
 
-FFT as a divide and conquer algorithm, master theorem, Cooley-Tuckey, DFT,
-change of basis (Vandermonde matrix)
-
-NTT is a DFT over a finite field of prime size (DFT is defined over the complex numbers or complex field)
-
-Coefficient representation -- evaluation --> Value representation
-Value representation -- interpolation --> Coefficient representation
-
-We can evaluate with
-* solving a system of linear equations
-* lagrange interpolation
-* DFT
-
-The key idea behind DFT is to reuse calculations (compare with Karatsuba multiplication).
 
 
 
