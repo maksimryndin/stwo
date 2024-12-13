@@ -28,38 +28,3 @@ We can evaluate with
 
 The key idea behind FFT is to reuse calculations (compare with Karatsuba multiplication).
 
-Let's
-
-$$
-\begin{bmatrix}
-f(x_0)\\\\
-f(x_1)\\\\
-f(x_2)\\\\
-f(x_3)
-\end{bmatrix} =
-\begin{bmatrix}
-1 & x_0 & x_0^2 & x_0^3\\\\
-1 & x_1 & x_1^2 & x_1^3\\\\
-1 & x_2 & x_2^2 & x_2^3\\\\
-1 & x_3 & x_3^2 & x_3^3
-\end{bmatrix}
-\begin{bmatrix}
-c_0\\\\
-c_1\\\\
-c_2\\\\
-c_3
-\end{bmatrix}
-$$
-Where:
-
-$f$ is a 4-dimensional vector of function evaluations:
-$$f = \begin{bmatrix} f(x_0) \ f(x_1) \ f(x_2) \ f(x_3) \end{bmatrix}$$
-$X$ is the Vandermonde matrix:
-$$X = \begin{bmatrix}
-1 & x_0 & x_0^2 & x_0^3 \
-1 & x_1 & x_1^2 & x_1^3 \
-1 & x_2 & x_2^2 & x_2^3 \
-1 & x_3 & x_3^2 & x_3^3
-\end{bmatrix}$$
-$c$ is the vector of coefficients:
-$$c = \begin{bmatrix} c_0 \ c_1 \ c_2 \ c_3 \end{bmatrix}$$
