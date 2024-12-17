@@ -172,7 +172,7 @@ At the final step we have an evaluation at one point. Let's picture the recursio
 The height of the tree is \\(log_2 N\\) and we have \\(O(N)\\) operations at every tree level (\\(N\\) additions and \\(N\\) multiplications). So the total complexity is \\(O(N * log_2 N)\\). Take your time to appreciate the beauty of it!
 
 Let's summarize on what has helped us here[^assumptions]:
-1) The unlimited divisibility by 2 (so called "2-addicity") - we can decrease the problem of size \\(2^n\\) into 2 subproblems of size \\(2^{n-1}\\)
+1) The unlimited divisibility by 2 (so called "2-adicity", factorization of n contains a large power of 2) - we can decrease the problem of size \\(2^n\\) into 2 subproblems of size \\(2^{n-1}\\)
 2) The half-reduction of evaluation domain by squaring operation (the original domain is mapped into half of it and this property is preserved along all recursion steps)
 
 // crates/prover/src/core/poly/circle/domain.rs
