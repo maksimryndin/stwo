@@ -1,6 +1,7 @@
 # Circle
 
 
+
 Multiplicative group of Fp (excluding 0)
 
 Exercise: write a small program to factor the size of a multiplicative group (2^31 - 1 - 1) into prime factors? What degree of 2 do you observe?

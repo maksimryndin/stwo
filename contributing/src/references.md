@@ -21,4 +21,6 @@
 19. [Circle STARK: Understanding Circle Group’s Operation as Rotation](https://www.shuangcrypto.com/2024/11/13/circle-stark-understanding-circle-group/) (accessed in November 2024)
 20. [Coset](https://www.shuangcrypto.com/2024/11/06/coset/) (accessed in November 2024)
 21. [Mersenne 31 Polynomial Arithmetic](https://github.com/ingonyama-zk/papers/blob/main/Mersenne31_polynomial_arithmetic.pdf) (accessed in November 2024)
-22. [NTT 201 - Foundations of NTT Hardware Design](https://github.com/ingonyama-zk/papers/blob/main/ntt_201_book.pdf)
+22. [NTT 201 - Foundations of NTT Hardware Design](https://github.com/ingonyama-zk/papers/blob/main/ntt_201_book.pdf) (accessed in November 2024)
+23. [https://github.com/ethereum/research/tree/master/circlestark](https://github.com/ethereum/research/tree/master/circlestark) (accessed in December 2024)
+24. [Vectorized Rust, An Introduction](https://x.com/jtriley_eth/status/1866137961471103002) (accessed in December 2024)

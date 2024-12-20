@@ -1,5 +1,16 @@
 # Group
 
+The circle curve [can be treated](https://www.researchgate.net/publication/371339788_Reed-Solomon_codes_over_the_circle_group) as a group.
+
+> Group  is an algebraic structure (less structured that Field) which has only one "addition" operation (as opposed to Field) which is associative (you can place brackets as you wish) and closed over the set of its elements. A neutral element is defined (think of it as 0 for addition) and every element of the group has an inverse element (if we "add" a group element with its inverse, we get the identity element).
+
+The "addition" operation for the circle curve group is defined by [`Add`](crates/prover/src/core/circle.rs) trait implementation for `CirclePoint<F>`. A neutral and inverse elements are implemented as `zero()` and `conjugate(&self)` methods of `CirclePoint<F>` accordingly (see also [`Neg`](crates/prover/src/core/circle.rs) trait implementation for `CirclePoint<F>`). The inverse operation is defined by 
+
+\\(J(x, y) := (x, -y)\\), also called "the involution" in the paper.
+
+Moreover, the circle curve group is a [cyclic group](http://abstract.ups.edu/aata/cyclic-section-cyclic-subgroups.html), i.e. all its elements can be obtained from a single one, called *generator*, by applying the group's operation (some number of times).
+
+Circle points are placed of over the circle. And if we consider a zero as a start, then we can index
 
 Exercise: Verify that the neutral element (1, 0) of the Circle group under group operation applied to it any positive number of times produces itself. Explain why it happens.
 
@@ -47,8 +58,6 @@ fn find_m31_circle_generator() -> CirclePoint<M31> {
         for _index in 0..P - 1 {
             // 0..(2 ** 31 - 2) (or 2 ** 31 - 2 field elements exluding the neutral one)
             // apply group operation to generator `_index` times
-            // Exercise: why can we step here by doubling the generator
-            // instead of accumulating by one point every iteration?
             acc = acc + point;
             if acc == CirclePoint::zero() {
                 continue 'generator_x;

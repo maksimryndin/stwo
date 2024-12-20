@@ -104,16 +104,6 @@ As a quick refresher on domain and image of the mapping(function) see [Cartesian
 The circle curve is defined by the equation x^2 + y^2 = 1, where x and y come from the finite prime field. At the current stage of the proof the field is M31. The circle curve is represented by [`struct CirclePoint`](crates/prover/src/core/circle.rs) and 
 
 
-The circle curve [can be treated](https://www.researchgate.net/publication/371339788_Reed-Solomon_codes_over_the_circle_group) as a group.
-
-> Group  is an algebraic structure (less structured that Field) which has only one "addition" operation (as opposed to Field) which is associative (you can place brackets as you wish) and closed over the set of its elements. An identity element is defined (think of it as 0 for addition) and every element of the group has an inverse element (if we "add" a group element with its inverse, we get the identity element).
-
-The "addition" operation for the circle curve group is defined by [`Add`](crates/prover/src/core/circle.rs) trait implementation for `CirclePoint<F>`. Identity and inverse elements are implemented as `zero()` and `conjugate(&self)` methods of `CirclePoint<F>` accordingly.
-
-Moreover, the circle curve group is a [cyclic group](http://abstract.ups.edu/aata/cyclic-section-cyclic-subgroups.html), i.e. all its elements can be obtained from a single one, called *generator*, by applying the group's operation (some number of times).
-
-Circle points are placed of over the circle. And if we consider a zero as a start, then we can index 
-
 > Why do we need this Circle over the Field at all? Why not work direclty over the field? The reason is that M31 is not FFT-friendly - more on it later.
 
 > [Groups](http://abstract.ups.edu/aata/groups-section-defnitions.html)
