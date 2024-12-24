@@ -2,7 +2,7 @@
 
 
 
-Primes of the form \\(p = 2^{n+1} - 1\\)[^mersenne] where  \\(n >= 1\\) are called Mersenne primes. In the binary form they are just \\(n\\) `1`s. The smallest is 7 (`n = 2`), \\(2^{31} - 1\\) fits `u32` and \\(2^{61} - 1\\) fits `u64`.
+Primes of the form \\(p = 2^{n+1} - 1\\)[^mersenne] where  \\(n >= 1\\) are called Mersenne primes. In the binary form they are just \\(n\\) `1`s. The smallest is 3 (`n = 1`); \\(2^{31} - 1\\) fits `u32` and \\(2^{61} - 1\\) fits `u64`.
 
 
 
