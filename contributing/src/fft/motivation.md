@@ -1,9 +1,9 @@
 # Motivation
 
 
-Let's consider first the idea of fast polynomial evaluation. We have 3-degree (cubic) polynomial 
+Let's consider first the idea of fast polynomial evaluation over real numbers domain \\(R\\). We have 3-degree (cubic) polynomial 
 \\(f(x) = c_0 + c_1 * x + c_2 * x^2 + c_3 * x^3\\) and we want to evaluate it at 4 points: 
-\\(x_0, ..., x_3\\). A direct approach would involve \\(N^2\\) operations. 
+\\(x_0, ..., x_3\\) where \\(x_i, c_i \in R\\). A direct approach would involve \\(N^2\\) operations. 
 
 Let's represent it in the matrix form:
 
@@ -29,8 +29,14 @@ c_3
 $$
 
 Let's reorder a little the polynomial: 
-\\(f(x) = c_0 + c_2 * x^2 + c_1 * x + c_3 * x^3 =  c_0 + c_2 * x^2 + x * (c_1 + c_3 * x^2) = f_e(x^2) + x * f_o(x^2)\\). 
-We grouped even- and odd-degree monomials (terms \\(c_i * x^i\\)). In the matrix form 
+\\(f(x) = c_0 + c_2 * x^2 + c_1 * x + c_3 * x^3 =  c_0 + c_2 * x^2 + x * (c_1 + c_3 * x^2) = f_{even}(x^2) + x * f_{odd}(x^2)\\). 
+We grouped even- and odd-degree monomials (terms \\(c_i * x^i\\)). We can also write an even part of the odd-even decomposition as
+
+\\(f_{even}(x^2) = \frac{f(x) + f(-x)}{2}\\)
+
+Exercise: write a formula for a corresponding odd part \\(f_{odd}(x^2)\\) of the decomposition.
+
+ In the matrix form 
 it should look like (note that we reordered matrix columns and entries of the coefficients vector):
 
 $$
@@ -113,7 +119,9 @@ c_3
 \end{bmatrix} =
 $$
 
-(Stop and verify the transformations here!). Hence we reduced the number of operations but the algorithmic complexity is still quadratic (verify). Can we come up with some clever divide-and-conquer algorithm? If we introduce a constraint that under squaring our 4 evaluation points become 2 other points, e.g. \\(x_0^2 = x_2^2 = \omega^2\\) and \\(x_1^2 = x_3^2 = \omega^2\\) (we could also require instead \\(x_0^2 = x_1^2\\) and \\(x_2^2 = x_3^2\\) or other combinations), so (up to a permutation of the points) we could have (horizontal line highlights the blocks):
+Exercise: Verify the transformations here, compare the terms in addition with explicit formulas for \\(f_{even}(x^2)\\) and \\(f_{odd}(x^2)\\).
+
+Hence we reduced the number of operations but the algorithmic complexity is still quadratic (verify). Can we come up with some clever divide-and-conquer algorithm? If we introduce a constraint that under squaring our 4 evaluation points become 2 other points, e.g. \\(x_0^2 = x_2^2 = \omega^2\\) and \\(x_1^2 = x_3^2 = \omega^2\\) (we could also require instead \\(x_0^2 = x_1^2\\) and \\(x_2^2 = x_3^2\\) or other combinations), so (up to a permutation of the points) we could have (horizontal line highlights the blocks):
 
 $$
 = \begin{bmatrix}

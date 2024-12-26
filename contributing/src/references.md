@@ -25,3 +25,4 @@
 23. [https://github.com/ethereum/research/tree/master/circlestark](https://github.com/ethereum/research/tree/master/circlestark) (accessed in December 2024)
 24. [Vectorized Rust, An Introduction](https://x.com/jtriley_eth/status/1866137961471103002) (accessed in December 2024)
 25. [Understanding SIMD Parallelization in Stwo Prover](https://x.com/raphael_dkhn/status/1866783357801058704) (accessed in December 2024)
+26. Algorithms by S. Dasgupta, C. H. Papadimitriou, and U. V. Vazirani
