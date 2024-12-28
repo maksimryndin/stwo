@@ -108,7 +108,7 @@ The circle curve is defined by the equation x^2 + y^2 = 1, where x and y come fr
 
 > [Groups](http://abstract.ups.edu/aata/groups-section-defnitions.html)
 > [Subgroups](http://abstract.ups.edu/aata/groups-section-subgroups.html)
-> [Coset](http://abstract.ups.edu/aata/cosets-section-cosets.html)
+> [Coset](http://abstract.ups.e`du/aata/cosets-section-cosets.html)
 
 If we follow the nested structs of `CanonicCoset::new(log_size).circle_domain()`, we come up to [`Coset`](../crates/prover/src/core/circle.rs).
 

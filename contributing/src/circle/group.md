@@ -4,9 +4,16 @@ The circle curve [can be treated](https://www.researchgate.net/publication/37133
 
 > Group  is an algebraic structure (less structured that Field) which has only one "addition" operation (as opposed to Field) which is associative (you can place brackets as you wish) and closed over the set of its elements. A neutral element is defined (think of it as 0 for addition) and every element of the group has an inverse element (if we "add" a group element with its inverse, we get the identity element).
 
-The "addition" operation for the circle curve group is defined by [`Add`](crates/prover/src/core/circle.rs) trait implementation for `CirclePoint<F>`. A neutral and inverse elements are implemented as `zero()` and `conjugate(&self)` methods of `CirclePoint<F>` accordingly (see also [`Neg`](crates/prover/src/core/circle.rs) trait implementation for `CirclePoint<F>`). The inverse operation is defined by 
+The "addition" operation for the circle curve group is defined by 
 
-\\(J(x, y) := (x, -y)\\), also called "the involution" in the paper.
+\\((x_0, y_0) \cdot (x_1, y_1) = () \\)
+
+and implemented by trait [`Add`](crates/prover/src/core/circle.rs) for `CirclePoint<F>`. You may have some confusion here as I do because the operation clearly resembles the mulitplication of complex numbers (compare!) and even uses the same multiplication dot symbol in the paper but let's persuade ourselves with the following: a group as an algebraic strucure has only a single binary operation so we just default using \\(+\\)" sign.
+
+
+A neutral and inverse elements are implemented as `zero()` and `conjugate(&self)` methods of `CirclePoint<F>` accordingly (see also [`Neg`](crates/prover/src/core/circle.rs) trait implementation for `CirclePoint<F>`). The inverse operation is defined by 
+
+\\(J(x, y) := (x, -y)\\) which is an *involution* (an operation which is inverse to itself).
 
 Moreover, the circle curve group is a [cyclic group](http://abstract.ups.edu/aata/cyclic-section-cyclic-subgroups.html), i.e. all its elements can be obtained from a single one, called *generator*, by applying the group's operation (some number of times).
 

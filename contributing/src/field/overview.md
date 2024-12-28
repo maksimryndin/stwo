@@ -4,8 +4,6 @@
 
 Primes of the form \\(p = 2^{n+1} - 1\\)[^mersenne] where  \\(n >= 1\\) are called Mersenne primes. In the binary form they are just \\(n\\) `1`s. The smallest is 3 (`n = 1`); \\(2^{31} - 1\\) fits `u32` and \\(2^{61} - 1\\) fits `u64`.
 
-
-
 Exercise: benchmark the modulo reduction operation `%` and the specific implemented for Mersenne prime.
 
 Exercise: Can \\(n+1\\) in the definition of Mersenne prime \\(p = 2^{n+1} - 1\\) be a composite number? (You may find useful [the factorization](https://proofwiki.org/wiki/Difference_of_Two_Powers))
