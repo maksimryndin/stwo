@@ -1,25 +1,50 @@
 # Group
 
-The circle curve [can be treated](https://www.researchgate.net/publication/371339788_Reed-Solomon_codes_over_the_circle_group) as a group.
+The circle curve can be treated as a group.
 
-> Group  is an algebraic structure (less structured that Field) which has only one "addition" operation (as opposed to Field) which is associative (you can place brackets as you wish) and closed over the set of its elements. A neutral element is defined (think of it as 0 for addition) and every element of the group has an inverse element (if we "add" a group element with its inverse, we get the identity element).
+We are already familiar with such an algebraic structure as *field*.
+
+> Group  is an algebraic structure which has only one "addition" operation (as opposed to Field) which is associative (you can place brackets as you wish) and closed over the set of its elements. A neutral element is defined (think of it as 0 for addition) and every element of the group has an inverse element (if we "add" a group element with its inverse, we get the identity element).
+
+Actually, M31 field is a group over its addition operation but it is not one over its multiplication operation (as 0 has no inverse). Let's summarize the differences:
+
+* Field:
+    - has two binary operations (addition and multiplication)
+    - both operations must be associative 
+    - both operations *must* be commutative
+    - there must be neutral (addition) and identity (multiplication) elements
+    - the inverse element exists under addition for all elements
+    - the inverse element exists under multiplication for all elements except neutral one
+* Group
+    - has a single binary operation
+    - the operation must be associative (we can put brackets as we wish)
+    - the operation *may be* commutative (an abelian group)
+    - there must be neutral/identity element
+    - the inverse element exists for all elements
 
 The "addition" operation for the circle curve group is defined by 
 
-\\((x_0, y_0) \cdot (x_1, y_1) = () \\)
+\\((x_0, y_0) \cdot (x_1, y_1) = (x_0x_1 - y_0y_1, x_0y_1 + y_0x_1)\\)
 
-and implemented by trait [`Add`](crates/prover/src/core/circle.rs) for `CirclePoint<F>`. You may have some confusion here as I do because the operation clearly resembles the mulitplication of complex numbers (compare!) and even uses the same multiplication dot symbol in the paper but let's persuade ourselves with the following: a group as an algebraic strucure has only a single binary operation so we just default using \\(+\\)" sign.
+and implemented by trait [`Add`](crates/prover/src/core/circle.rs) for `CirclePoint<F>`. The operation clearly resembles the multiplication of complex numbers[^commutative] (compare!). It is not a mere coincidence - actually, the circle group is a unit circle in the complex extension of prime field M31 \\(\mathbb{C(F)} = \\{x + \mathbb{i} \cdot y: x, y \in F\\}\\). So the unit circle can be also defined as:
 
+\\(S_1 = \\{z \in \mathbb{C(F)^*}: z \cdot \bar{z} = 1\\}\\) 
 
-A neutral and inverse elements are implemented as `zero()` and `conjugate(&self)` methods of `CirclePoint<F>` accordingly (see also [`Neg`](crates/prover/src/core/circle.rs) trait implementation for `CirclePoint<F>`). The inverse operation is defined by 
+where \\(\mathbb{C(F)^*}\\) is a complex multiplicative group (i.e. a subset of complex extension with a multiplication operation).
 
-\\(J(x, y) := (x, -y)\\) which is an *involution* (an operation which is inverse to itself).
+A group as an algebraic strucure has only a single binary operation so we're just by default using "\\(+\\)" sign and `Add` trait in the code. So the neutral element (implemented as `zero()` method of `CirclePoint<F>`) is analogous to \\((1, 0)\\) in complex numbers field.
 
-Moreover, the circle curve group is a [cyclic group](http://abstract.ups.edu/aata/cyclic-section-cyclic-subgroups.html), i.e. all its elements can be obtained from a single one, called *generator*, by applying the group's operation (some number of times).
+The inverse operation ((implemented as `conjugate(&self)` method of `CirclePoint<F>`)) is defined by 
+
+\\(J(x, y) := (x, -y)\\) which is an *involution* (an operation which is inverse to itself). Note that it is similar to *conjugate* complex numbers and means mirroring a point over the x-axis.
+
+Exercise: verify that \\(J(x, y)\\) indeed gives an inverse element under the circle group operation.
+
+Moreover, the circle curve group is a *cyclic group*, i.e. all its elements can be obtained from a single one, called *generator*, by applying the group's operation (some number of times).
 
 Circle points are placed of over the circle. And if we consider a zero as a start, then we can index
 
-Exercise: Verify that the neutral element (1, 0) of the Circle group under group operation applied to it any positive number of times produces itself. Explain why it happens.
+Exercise: Verify that the neutral element \\((1, 0)\\) of the Circle group under group operation applied to it any positive number of times produces itself. Explain why it happens.
 
 How can we find the generator of the Circle group? Basically, the generator is a `CirclePoint` 
 
@@ -84,3 +109,6 @@ fn circle_group_generator() {
 ```
 
 Exercise: is the generator unique? If not, can you explain why and find other generators?
+
+
+[^commutative]: As we do remember from our exploration of complex numbers, such an operation is commutative so the circle group is a *commutative group* (or *abelian group*).

@@ -2,10 +2,12 @@
 
 - [Introduction](./introduction.md)
 - [Basics](./basics/overview.md)
-    - [Polynomials](./basics/polynomials.md)
     - [Primes](./basics/primes.md)
+    - [Modular arithmetic](./basics/modular.md)
+    - [Polynomials](./basics/polynomials.md)
     - [Complex numbers](./basics/complex.md)
 - [Field](./field/overview.md)
+    - [Polynomial ring](./field/ring.md)
 - [Circle](./circle/overview.md)
     - [Group](./circle/group.md)
     - [Bivariate polynomials](./circle/bivariate.md)

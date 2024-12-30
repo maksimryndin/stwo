@@ -1,9 +1,9 @@
 # Motivation
 
 
-Let's consider first the idea of fast polynomial evaluation over real numbers domain \\(\mathbb{R}\\). We have 3-degree (cubic) polynomial 
+Let's consider first the idea of fast polynomial evaluation over circle group domain. We have 3-degree (cubic) polynomial 
 \\(f(x) = c_0 + c_1 * x + c_2 * x^2 + c_3 * x^3\\) and we want to evaluate it at 4 points: 
-\\(x_0, ..., x_3\\) where \\(x_i, c_i \in \mathbb{R}\\). A direct approach would involve \\(N^2\\) operations. 
+\\(x_0, ..., x_3\\) where \\(x_i, c_i\\) are from the circle group. A direct approach would involve \\(N^2\\) operations. 
 
 Let's represent it in the matrix form:
 
@@ -204,4 +204,4 @@ Now you should understand why we need `CircleDomain` - and you should be able to
 
 Your may disagree that we enforced constraints on the evaluation domain (but our initial goal was to evaluate at some prescribed points). But actually what we are looking for here, is the inverse operation. We can define n-degree polynomials via its n+1 coefficients and equivalently via n+1 evaluations (2 points define a line c_0 + c_1 * x). So the inverse operation to our matrix multiplications could lead us to fast *interpolation*, i.e. finding the polynomial which goes through the points 
 
-[^assumptions]: If under the assumption 2 we use roots of unity, we get a classical Radix-2 [Cooley-Tuckey FFT algorithm](https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm) and evaluations/interpolations over the real domain \\(\mathbb{R}\\). The assumption 2 can also be alleviated to [factoring](https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm#Variations).
+[^assumptions]: If under the assumption 2 we use roots of unity, we get a classical Radix-2 [Cooley-Tuckey FFT algorithm](https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm) and evaluations/interpolations over the complex field domain \\(\mathbb{C}\\) (complex extension of \\(\mathbb{R}\\)) for the same reasons as for the circle group domain - excellent divisibility by 2 and halving under squaring. The assumption 2 can also be alleviated to [factoring](https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm#Variations).

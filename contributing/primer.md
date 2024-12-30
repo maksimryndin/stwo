@@ -51,13 +51,7 @@ pub fn gen_trace(
 It takes `log_size` - a logarithm of a number of rows `N`
 The trace matrix is represented by the [`ColumnVec`](crates/prover/src/core/mod.rs) (length of a number of rows `N` - `2^log_size`) of columns [`Column`](crates/prover/src/core/backend/mod.rs). The trait implementation is parametrized by a backend (`SimdBackend`) and a field (`BaseField`). Let's start with the latter.
 
-All operations with numbers are performed over some *field*. 
 
-> Field is an algebraic structure over a set of some objects (*field elements* or *felts* for short) with defined operations of addition and multiplication closed over the set (i.e. adding or multiplying two felts results in the felt belonging to the same set); every non-zero element has a multiplicative inverse. For example, fields generalize the set of real numbers (R) and allow to deduce some general laws (e.g. the associative law) for felts of some general nature.
-
-Why fields and not real numbers? Real numbers involve rounding errors due to their representation in a computer. Moreover, the result of an operation (addition/multiplication) is unbounded. 
-
-A much more natural fit for current CPU architectures is a finite prime field, Fp. (A prime number p has no divisors except 1 and itself). All operations in such a field are done modulo p so the set of possible felts is {0, 1, ..., p-1}.
 
 > Refresher on [The Integers mod n](http://abstract.ups.edu/aata/groups-section-mod-n-sym.html)
 

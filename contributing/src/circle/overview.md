@@ -1,6 +1,7 @@
 # Circle
 
 
+\\(S_1 = \\{(x, y) \in F^2: x^2 + y^2 = 1\\}\\)
 
 Multiplicative group of Fp (excluding 0)
 

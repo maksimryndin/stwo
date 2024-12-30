@@ -50,6 +50,8 @@ As such definitions of addition and multiplication ensure that algebraic propert
 
 What is a unity element in case of complex numbers?
 
+TODO conjugate complex numbers, roots of unity?
+
 Exercise: find coordinate formulas for a zero element and a multiplicative inverse of the complex number (i.e. )
 
 [^natural]: There is [an ongoing dispute](https://en.wikipedia.org/wiki/Natural_number#:~:text=In%20mathematics%2C%20the%20natural%20numbers,%2C%203%2C%20...%20.) either to include or exclude 0 (usually depends on the application). Here we treat them as values of unsigned integers (focusing on engineering applications).
