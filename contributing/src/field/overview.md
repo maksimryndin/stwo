@@ -23,4 +23,6 @@ Exercise: Show that from \\(p = 2^{n+1} - 1\\) it follows that \\(p \equiv 3 \te
 
 There is [a mathematical fact](https://en.wikipedia.org/wiki/Quadratic_reciprocity#q_=_%C2%B11_and_the_first_supplement) that prime fields with \\(p \equiv 3 \textrm{mod}\ 4\\) do not have such a field element \\(x\\) that \\(x^2 \equiv 1  \textrm{mod}\ p\\). So the polynomial f(x) = x^2 + 1 is *irreducible* (it means it cannot be factored )
 
+In the basics chapter we considered polynomials in real values, i.e. \\(x \in \mathbb{R}) and addition/multiplication operations are defined in a familiar way as we think about numbers. But as we already discussed fields and we know that \\(\mathbb{R}\\) is a *field*, what happens when we replace \\(\mathbb{R}\\) with something more exotic like prime integer fields?
+
 [^mersenne]: We use a notational convention of the paper and we narrow down the definition of CFFT-friendly prime which is \\(2^{n+1} * t - 1\\) for \\(n, t >= 1\\) - see *2 Notations and definitions* of the paper. For Mersenne primes you would usually see \\(M_n = 2^n - 1\\).
