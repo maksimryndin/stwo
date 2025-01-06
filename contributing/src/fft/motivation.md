@@ -3,7 +3,7 @@
 
 Let's consider first the idea of fast polynomial evaluation over circle group domain. We have 3-degree (cubic) polynomial 
 \\(f(x) = c_0 + c_1 * x + c_2 * x^2 + c_3 * x^3\\) and we want to evaluate it at 4 points: 
-\\(x_0, ..., x_3\\) where \\(x_i, c_i\\) are from the circle group. A direct approach would involve \\(N^2\\) operations. 
+\\(x_0, ..., x_3\\) where \\(x_i, c_i\\) are from the circle group. A direct approach would involve \\(N^2\\) operations[^horner]. 
 
 Let's represent it in the matrix form:
 
@@ -27,6 +27,8 @@ c_2\\\\
 c_3
 \end{bmatrix}
 $$
+
+The matrix above is called [Vandermonde matrix](https://en.wikipedia.org/wiki/Vandermonde_matrix) and it has an inverse matrix \\(x_0, ..., x_3\\) if all \\(x_0, ..., x_3\\) are different. In this case a matrix equation \\(\boldsymbol{f} = \boldsymbol{V} \boldsymbol{c}\\) has a unique solution for coefficients \\(\boldsymbol{c} = \boldsymbol{V}^{-1} \boldsymbol{f}\\), thus in a general case an \\(n-1\\)-degree polynomial is uniquely defined by \\(n\\) *distinct* points.
 
 Let's reorder a little the polynomial: 
 \\(f(x) = c_0 + c_2 * x^2 + c_1 * x + c_3 * x^3 =  c_0 + c_2 * x^2 + x * (c_1 + c_3 * x^2) = f_{even}(x^2) + x * f_{odd}(x^2)\\). 
@@ -202,7 +204,9 @@ The squaring operation \\(\pi\\) is more exotic in the case of `CirclePoint`.
 
 Now you should understand why we need `CircleDomain` - and you should be able to mostly understand *1 Introduction* of the paper.
 
-Your may disagree that we enforced constraints on the evaluation domain (but our initial goal was to evaluate at some prescribed points). But actually what we are looking for here, is the inverse operation. We can define n-degree polynomials via its n+1 coefficients and equivalently via n+1 evaluations (2 points define a line c_0 + c_1 * x). So the inverse operation to our matrix multiplications could lead us to fast *interpolation*, i.e. finding the polynomial which goes through the points[^polynomial_multiplication] 
+Your may disagree that we enforced constraints on the evaluation domain (but our initial goal was to evaluate at some prescribed points). But actually what we are looking for here, is the inverse operation. We can define n-degree polynomials via its n+1 coefficients and equivalently via n+1 evaluations (2 points define a line c_0 + c_1 * x). So the inverse operation to our matrix multiplications could lead us to fast *interpolation*, i.e. finding the polynomial which goes through the points[^polynomial_multiplication]
+
+[^horner]: for an efficient \\(\theta(N)\\) evaluation of a polynomial at a single point so called *Horner's rule* exists: \\(f(x_0) = c_0 + c_1 * x_0 + c_2 * x_0^2 + c_3 * x_0^3 = c_0 + x_0 * (c_1 + x_0 * (c_2 + x_0 * c_3))\\). And there are [other](https://en.wikipedia.org/wiki/Polynomial_evaluation) more sophisticated algorithms to avoid significant rounding errors in case of a floating point math (numerical instability).
 
 [^assumptions]: If under the assumption 2 we use roots of unity, we get a classical Radix-2 [Cooley-Tuckey FFT algorithm](https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm) and evaluations/interpolations over the complex field domain \\(\mathbb{C}\\) (complex extension of \\(\mathbb{R}\\)) for the same reasons as for the circle group domain - excellent divisibility by 2 and halving under squaring. The assumption 2 can also be alleviated to [factoring](https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm#Variations).
 
